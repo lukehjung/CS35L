@@ -1,0 +1,82 @@
+Luke Jung
+904-982-644
+CS33 Eggert
+Fall 2018
+
+Partner: Dominic Loftus (204-910-863)
+
+First thing we did was follow the piazza post about setting up the
+beaglebone, installing drivers and connecting it to wifi
+
+1. Connect to beaglebone and wifi
+
+a. connect to beaglebone through usb.
+ssh root@192.168.7.2 
+
+b. Set up wifi
+connmanctl
+enable wifi
+scan wifi
+services
+agent on
+connect wifi_2cf7f1068fec_4352333736302d77696669_managed_psk
+quit
+
+2. Update database of apt-get and download openssh
+a. grab updates for database and apt-get function
+apt-get update
+apt-get install xauth
+apt-get install xvfb
+
+b. install software to for open-ssh, client and server
+apt-get install openssh-server
+apt-get install openssh-client
+
+3. Generate public and private keys
+ssh-keygen
+Your identification has been saved in /root/.ssh/id_rsa.
+Your public key has been saved in /root/.ssh/id_rsa.pub.
+The key fingerprint is:
+0a:9d:cc:5e:5d:2f:45:86:7d:b7:b4:3f:b9:e3:5b:c1 root@304805526.lasr.cs.ucla.edu
+The key's randomart image is:
++---[RSA 2048]----+
+|             oo  |
+|            .o..o|
+|            . o.+|
+|     + . . . o.o |
+|    . = S . . .Eo|
+|     o o     . oo|
+|      o         +|
+|               o.|
+|              .oo|
++-----------------+
+
+4. Set up user on the server
+a. Sets up my user on the beaglebone to be able to log into
+useradd -d /home/luke -m luke
+passwd luke
+
+b. Give the beaglebone user accessibility from outside
+cd /home/luke
+mkdir .ssh
+chown -R luke .ssh
+chmod 700 .ssh
+
+5. Log into partner's beaglebone
+a. Log into specified ip address using ifconfig
+ifconfig
+ssh-copy-id -i luke@10.97.85.49
+
+b. Save a private key to the user so don't need a passphrase everytime.
+eval `ssh-agent -s`
+ssh-add
+ssh luke@10.97.85.49
+
+Now when we log into each other's beaglebone's, we don't have to put
+in a passphrase.
+
+Also, we are able to run commands like xterm on the different beaglebones,
+as long as we login with the -X command when we ssh.
+
+Therefore, we ahve successfully logged into each other's beaglebones,
+both being able to be the client and the serve on both accounts.

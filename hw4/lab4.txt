@@ -1,0 +1,215 @@
+Luke Jung
+904-982-644
+CS33 Eggert Fall
+
+Lab 4 Log
+
+1. Grab the tar file from the html file
+$ wget https://web.cs.ucla.edu/classes/fall18/cs35L/assign/
+coreutils-with-bug.tar.gz
+
+2. Unzip tar file
+$ xvzf coreutils-with-bug.tar.gz
+
+3. Create a new directory to install coreutils bugged version
+$ mkdir coreutils
+$ ./configure --prefix=/u/ee/ugrad/luke/cs35l/hw4/coreutils
+
+4. Install the program using the make command
+$ make //when using this command, I got an error when installing.
+
+5. Grab the patch file
+$ wget https://web.cs.ucla.edu/classes/fall18/cs35L/assign/coreutils.diff
+
+6. Edit the patch file deleting the ~
+$ emacs coreutils.diff
+
+7. Patch the core-utils file
+$ mv coreutils.diff coreutils-with-bug/coreutils.diff
+$ patch -p0 < coreutils.diff
+
+The patch fixed the problem that two functions had the same name, 
+so we changed the name of one of them.
+
+8. Make and install patched version
+$ make
+$ make install
+
+9. Check for bug
+
+$ tmp=$(mktemp -d)
+$ cd $tmp
+$ touch -d '1918-11-11 11:00 GMT' wwi-armistice
+$ touch now
+$ sleep 1
+$ touch now1
+$ TZ=UTC0 ~/cs35l/hw4/coreutils-with-bug/src/ls -lt 
+--full-time wwi-armistice now now1cd
+
+Doing this, I got the output
+
+-rw-r--r-- 1 luke eeugrad 0 1918-11-11 11:00:00.000000000 +0000 wwi-armistice
+-rw-r--r-- 1 luke eeugrad 0 2018-11-03 05:02:37.810876412 +0000 now1
+-rw-r--r-- 1 luke eeugrad 0 2018-11-03 05:02:34.291816447 +0000 now
+
+which is wrong, because the newest is supposed to be first
+
+10. Use GDB to find the bug
+Before using GDB, we have to create the files in the temp file to 
+make sure we can access them.  We can do this by copying the first 
+7 commands from #9.
+
+$ tmp=$(mktemp -d)
+$ cd $tmp
+$ touch -d '1918-11-11 11:00 GMT' wwi-armistice
+$ touch now
+$ sleep 1
+$ touch now1
+$ TZ=UTC0 ~/cs35l/hw4/coreutils-with-bug/src/ls -lt --full-time 
+wwi-armistice now now1
+
+Then we can access GDB and go directly to the ls executable
+
+$ gdb ~/cs35l/hw4/coreutils/bin/ls
+
+The first thing we have to find is the fucntion that sorts 
+the time of each file.  We can check all the functions of a 
+file using the info command
+
+(gdb) info functions
+
+Looking through these functions, I found a function called 
+sort_files which seemed promising so I put a breakpoint there.
+
+(gdb) break sort_files
+
+Now we can run the full ls function
+
+(gdb) r -lt --full-time wwi-armistice now now1
+Starting program: /w/home.18/ee/ugrad/luke/cs35l/hw4/coreutils/bin/ls
+-lt --full-time wwi-armistice now now1
+(gdb) s
+2975                  func = sort_reverse ? rev_cmp_mtime : compare_mtime;
+
+Once I got to the this part of the step funciton, I saw that the function 
+calls either rev_cmp_mtime or compare_mtime, so I needed to trace thse too
+
+(gdb) break compare_mtime
+(gdb) r -lt --full-time wwi-armistice now now1
+Starting program: /w/home.18/ee/ugrad/luke/cs35l/hw4/coreutils/bin/ls -lt 
+--full-time wwi-armistice now now1
+
+(gdb) s
+49        return diff ? diff : a.tv_nsec - b.tv_nsec;
+(gdb) info locals
+diff = 3
+diff = <optimized out>
+(gdb) s
+49        return diff ? diff : a.tv_nsec - b.tv_nsec;
+(gdb) info locals
+diff = -1139919939
+diff = <optimized out>
+
+I reduced some of the output because it was unecessary, 
+but I realized going through the compare_mtime function, 
+that we were getting large negative values for the 
+difference, meaning we have an integer overflow. 
+This comes from the following:
+
+timespec_cmp (struct timespec a, struct timespec b)
+47      {
+48        int diff = a.tv_sec - b.tv_sec;
+49        return diff ? diff : a.tv_nsec - b.tv_nsec;
+50      }
+
+Therefore, we're getting an overflow from the int diff variable, 
+messing up 
+our order.
+
+11. Avoid subtraction to fix the bug
+a. Go to the location of the timespec_cmp function
+$ cd ~/cs35l/hw4/coreutils-with-bug/lib
+b. Copy file to make diff file
+cp timespec.h/../timespec.h
+cd ..
+c. edit file to avoid subtracting
+
+static inline int
+timespec_cmp (struct timespec a, struct timespec b)
+{
+  if(a.tv_sec < b.tv_sec)
+    return -1;
+  if(a.tv_sec == b.tv_sec)
+    return 0;
+  if(a.tv_sec > b.tv_sec)
+    return 1;
+}
+
+I used if statements because it was the easiest and more readable way to
+avoid any subtraction.
+
+Then make a patch.diff file
+diff -u lib/timespec.h timespec.h >patch.diff
+
+Then make a changelog file
+emacs 
+C-x 4 a
+
+2018-11-02  Luke Hyun Jung  <luke@lnxsrv09.seas.ucla.edu>
+
+        * lib/timespec.h (timespec_cmp):
+        Use if statements to avoid using subtraction
+        to not have integer overflow with large numbers away
+
+cp ChangeLog lab4.diff
+cat patch.diff >> lab4.diff
+
+Also have to change the patch file to make the paths point directly
+to the lib/timespec.h file
+
+12. Patch file and check to see if it worked
+$ patch -p0 <lab5.diff
+patching file lib/timespec.h
+$ make
+
+[luke@lnxsrv09 ~]$ tmp=$(mktemp -d)
+[luke@lnxsrv09 ~]$ cd $tmp
+[luke@lnxsrv09 /tmp/tmp.iXx5vPuPQT]$ touch -d 
+'1918-11-11 11:00 GMT' wwi-armistice
+[luke@lnxsrv09 /tmp/tmp.iXx5vPuPQT]$ touch now
+[luke@lnxsrv09 /tmp/tmp.iXx5vPuPQT]$ sleep 1
+[luke@lnxsrv09 /tmp/tmp.iXx5vPuPQT]$ touch now1
+[luke@lnxsrv09 /tmp/tmp.iXx5vPuPQT]$ TZ=UTC0 ~/cs35l/hw4/
+coreutils-with-bug/src/ls
+-lt --full-time wwi-armistice now now1
+-rw-r--r-- 1 luke eeugrad 0 2018-11-03 18:14:37.170158198 
++0000 now1
+-rw-r--r-- 1 luke eeugrad 0 2018-11-03 18:14:36.166141042 
++0000 now
+-rw-r--r-- 1 luke eeugrad 0 1918-11-11 11:00:00.000000000 +
+0000 wwi-armistice
+
+Now this works correctly and the bug is fixed.
+
+7. Check on SEASnet
+First, have to go to the home directory
+$ cd
+
+[luke@lnxsrv09 ~]$ touch -d '1918-11-11 11:00 GMT' wwi-armistice
+[luke@lnxsrv09 ~]$ touch now
+[luke@lnxsrv09 ~]$ sleep 1
+[luke@lnxsrv09 ~]$ touch now1
+[luke@lnxsrv09 ~]$ TZ=UTC0 ~/cs35l/hw4/coreutils-with-bug/src/ls 
+-lt --full-time wwi-armistice now now1
+-rw-r--r-- 1 luke eeugrad 0 2054-12-17 17:28:16.000000000 
++0000 wwi-armistice
+-rw-r--r-- 1 luke eeugrad 0 2018-11-03 18:16:15.696425000 +0000 now1
+-rw-r--r-- 1 luke eeugrad 0 2018-11-03 18:16:14.690062000 +0000 now
+
+So when we do the function in our home directory, 
+we get the year to be 2054, a year really far into 
+the future instead of 1918. I'm guessing this has to 
+do with truncating the bits when they're added, since 
+we're getting a high value positive while it's supposed 
+to be a high value negative.  This could be due to losing 
+the MSB through truncation.

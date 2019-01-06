@@ -1,0 +1,25 @@
+gitk-description.txt
+Luke Jung
+904-982-644
+Eggert Fall 2018
+CS35L
+
+gitk description
+
+Top Left:
+List of commits and short topic/description of each change.
+Also it shows the branches of how they're changing each other and working.
+
+Top Middle:
+List of all the authors and corresponding topic/commit.
+
+Top Right:
+The date and time of each corresponding
+
+Bottom Left:
+Explains body of commit, shows the author, committer, parents, children,
+branches etc.
+Shows the changelog of the commit.
+
+Bottom Right:
+Shows all the files that were changed by the commit

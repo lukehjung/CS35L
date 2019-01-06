@@ -1,0 +1,28 @@
+Q3. If we run this script on an empty file like /dev/null, 
+we get the following error
+Traceback (most recent call last):
+  File "./randline.py", line 70, in <module>
+    main()
+  File "./randline.py", line 64, in main
+    sys.stdout.write(generator.chooseline())
+  File "./randline.py", line 34, in chooseline
+    return random.choice(self.lines)
+  File "/usr/lib64/python2.7/random.py", line 274, in choice
+    return seq[int(self.random() * len(seq))]  
+	# raises IndexError if seq is empty
+IndexError: list index out of range
+
+This happens because the randline.py file assumes that the file 
+is not empty, and thereby chooses some random line non 0.  
+However since the file has no lines, it accesses a line that's 
+not there, giving undefined behavior
+
+Q4. When running this command using python3, we get the error
+File "randline.py", line 65
+    except IOError as (errno, strerror):
+                      ^
+SyntaxError: invalid syntax 
+
+Python3 uses tuple assignment with unpacking which means it assigns values
+all in one line together, but since there's nothing to assign, it provides
+a sytnax error and won't run at all.

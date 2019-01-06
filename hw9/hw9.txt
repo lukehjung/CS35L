@@ -1,0 +1,76 @@
+hw9.txt
+Luke Jung
+904-982-644
+Eggert Fall 2018
+CS35L
+
+2. Create checkout branch
+git checkout -b 'quote' 'v3.0'
+
+3. Patch
+patch -p1 <quote-3.0-patch.txt 
+patching file src/cmp.c
+patching file src/diff.c
+patching file src/diff3.c
+patching file src/dir.c
+patching file src/sdiff.c
+patching file src/util.c
+
+4/5. Change log
+emacs 
+C-x 4 a
+
+I copy pasted the commit description into the emacs ChangeLog, but only
+the the ones where the file was changed correctly.
+
+6. Commit Changes
+man git commit
+git commit -aF ChangeLog
+
+7. Generate formatted patch file
+man git format-patch
+git format-patch -1 --stdout > formatted-patch.txt
+
+8. Applying partner's 
+First need to make a new checkout branch called partner
+git checkout -b 'partner' 'v3.0'
+
+My partner's name:
+Dominic Loftus
+203-910-863
+
+Then used the command
+git am formatted-patch-dom.txt
+
+Once it's patched, we go through the process of building the new file
+
+./bootstrap
+patch -p0 <diffutils-gets.diff
+./configure
+make
+
+make check
+
+And we see that things are successful.
+
+9. Make Distdir
+make distdir
+cd diffutils-3.0.1-41d4
+emacs ChangeLog
+
+Looking into this file, I see Dominic's comments in the changelog so it
+works 
+
+10. Gitk
+To load a 3rd party application, I had to first download xquartz on my
+computer and restart it.  I went to their main website 
+https://www.xquartz.org/ and installed it.  I then tried to gitk the
+path for eggert's library, but it really wasn't opening so I decided to
+just download the git from the website and run the command in there.
+I actually got a few errors when installing but it seemed to work.
+
+git clone https://git.savannah.gnu.org/git/emacs.git
+gitk
+
+Doing this opened up xquartz window and I could see all the different
+commits and changes.

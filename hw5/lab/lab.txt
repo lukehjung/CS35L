@@ -1,0 +1,117 @@
+To write the different tr files, I used the 
+knowledge from the previous homework of decoding
+and saw that it would mostly be the same process.
+
+I also had to look up the argv parameter in int main
+to understand where the options get stored
+
+
+3. Measuring System Calls 
+I used a c function to generate a large file with 
+random text.
+
+#include <stdlib.h>
+#include <unistd.h>
+
+int main() {
+    char c;
+    for (int i = 0; i < 5000000; i++) {
+        c = rand()% (127 - 32) + 32;
+        write(1, &c, 1);
+    }
+}
+
+a)
+To copy one file to another I used the command
+strace -c ./tr2b 'a' 'x' < output.txt > output1
+
+% time     seconds  usecs/call     calls    errors syscall
+------ ----------- ----------- --------- --------- ----------------
+ 54.54    0.000595           1       611           write
+ 29.33    0.000320           1       613           read
+  5.04    0.000055           6         9           mmap
+  3.02    0.000033           8         4           mprotect
+  1.92    0.000021           5         4           fstat
+  1.47    0.000016           8         2           open
+  1.10    0.000012          12         1           munmap
+  1.10    0.000012          12         1           execve
+  0.73    0.000008           4         2           close
+  0.73    0.000008           8         1         1 access
+  0.64    0.000007           7         1           brk
+  0.37    0.000004           4         1           arch_prctl
+------ ----------- ----------- --------- --------- ----------------
+100.00    0.001091                  1250         1 total
+
+
+strace -c ./tr2u 'a' 'x' < output.txt > output2
+% time     seconds  usecs/call     calls    errors syscall
+------ ----------- ----------- --------- --------- ----------------
+ 55.66   25.747152           5   5000000           write
+ 44.34   20.510023           4   5000002           read
+  0.00    0.000000           0         2           open
+  0.00    0.000000           0         2           close
+  0.00    0.000000           0         2           fstat
+  0.00    0.000000           0         7           mmap
+  0.00    0.000000           0         4           mprotect
+  0.00    0.000000           0         1           munmap
+  0.00    0.000000           0         1           brk
+  0.00    0.000000           0         1         1 access
+  0.00    0.000000           0         1           execve
+  0.00    0.000000           0         1           arch_prctl
+------ ----------- ----------- --------- --------- ----------------
+100.00   46.257175              10000024         1 total
+
+So here the buffered one did a much better job
+
+b)
+% time     seconds  usecs/call     calls    errors syscall
+------ ----------- ----------- --------- --------- ----------------
+ 92.80    0.016514           3      4883           write
+  6.18    0.001099           2       613           read
+  0.30    0.000054           6         9           mmap
+  0.20    0.000035           9         4           fstat
+  0.20    0.000035           9         4           mprotect
+  0.09    0.000016           8         2           open
+  0.07    0.000012          12         1           munmap
+  0.04    0.000008           4         2           close
+  0.04    0.000008           8         1         1 access
+  0.04    0.000007           7         1           execve
+  0.03    0.000005           5         1           brk
+  0.02    0.000003           3         1           arch_prctl
+------ ----------- ----------- --------- --------- ----------------
+100.00    0.017796                  5522         1 total
+
+
+strace -c ./tr2u 'a' 'x' < output.txt
+% time     seconds  usecs/call     calls    errors syscall
+------ ----------- ----------- --------- --------- ----------------
+ 56.55   26.294409           5   5000000           write
+ 43.45   20.201829           4   5000002           read
+  0.00    0.000041           6         7           mmap
+  0.00    0.000030           8         4           mprotect
+  0.00    0.000016           8         2           open
+  0.00    0.000014          14         1           execve
+  0.00    0.000012          12         1           munmap
+  0.00    0.000008           4         2           close
+  0.00    0.000008           4         2           fstat
+  0.00    0.000007           7         1         1 access
+  0.00    0.000004           4         1           brk
+  0.00    0.000003           3         1           arch_prctl
+------ ----------- ----------- --------- --------- ----------------
+100.00   46.496381              10000024         1 total
+
+buffered one still did better, but took a bunch more write calls than 
+copying
+
+4. Testing time
+time ./tr2b 'a' 'z' < output.txt > output1
+
+real 0m0.250s
+user 0m0.155s
+sys 0m0.006s
+
+time ./tr2u 'a' 'z' < output.txt > output2
+
+real 0m11.429s
+user 0m1.542s
+sys 0m9.792s

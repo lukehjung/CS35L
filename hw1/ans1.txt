@@ -1,0 +1,33 @@
+1. Man -k 
+Prints all commands that have a specific word
+2. /usr/bin/mv /usr/bin/sh
+Using the which command will show the path of each program. 
+3. /usr/bin/ar  /usr/bin/pr  /usr/bin/tr 
+I used the shell command find /usr/bin/?r to find all the two character programs that end in r.
+4. /etc/alternatives/emacs 
+Using readline /usr/bin/emacs, we find the actual file where the emacs program is located
+5. usr/bin/gcc version: gcc (GCC) 4.8.5 20150623 (Red Hat 4.8.5-28)
+Plain gcc: gcc (GCC) 8.2.0
+They are different versions because the first one is a specified program in the usr/bin, while the plain gcc grabs the file from /usr/local/cs/bin
+6. u+sx means giving the user who owns the file permissions of set user or group ID on execution and ability to execute.  
+O-w sets the permissions granted to other users the inability to write.
+7. find /usr/local/cs -type d -mtime +28
+8. 302
+I used find /usr/bin  -type l | wc -l
+9. librom1394.so.0.3.0
+I used ls -lt /usr/lib64
+10. localedef (1p)
+I used man -k locale and searched for locale data
+11. Downcase-dwim, downcast-region, downcast-word.  
+I used following commands:
+Emacs
+C-h h
+A
+Downcase
+12. C-M-r uses a regexp I-search backward engine, which is like a regular search function but can be encoded with specific functions as well.  
+C-M-v scroll the next window.  I tried the two commands in a blank emacs editor.
+13. C-g quits the current action that was occurring.  
+I learned this when using the help section, using C-g would leave the help or any other sub buffer
+14. The yank command is like a paste command, where it inserts text that's saved before where indicated.  
+You can easily invoke it when you kill a selection with C-w, you can use C-y to put it back, or reinserting.
+15. ls -l lists many more properties of each file including read write execute permissions, while dired only shows the names

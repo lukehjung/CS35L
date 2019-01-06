@@ -1,0 +1,25 @@
+hw.txt
+Luke Jung
+904-982-644
+Eggert Fall 2018
+CS35L
+
+1. If the other team was still monitoring bits, we would still be secure
+because each bit is encrypted with the public key and when passed over 
+it can be decrypted using the public key.  Since the other team doesn't
+have access to the private key, they would never be able to see what
+we're sending.
+If the keyboard was tapped, then there's a higher risk of getting attacked
+because they can see the passwords we use for the pass phrase and the
+actual password we created when we started up the server.  But if there 
+isn't password authentication, then they couldn't access the server regardless.
+For usb, if they had access to our .ssh folder, they could extract
+our private key and decrypt all of our information.
+
+2. The --verify command doesn't really verify that I created the file
+because the command doesn't check the owner of the file but checks to see
+if the public key and signature match each other.  So if the data was modified and signed by a different public key, then it would still be
+"verified" making it not the creator.
+We could solve this by having the public key be posted somewhere to 
+verify that it matches the signature, and if it doesn't then it means
+that the signature was tampered with.

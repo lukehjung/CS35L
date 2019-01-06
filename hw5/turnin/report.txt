@@ -1,0 +1,226 @@
+Luke Jung
+904-982-644
+CS33 Fall 2018 Eggert
+
+----lab.txt----
+To write the different tr files, I used the 
+knowledge from the previous homework of decoding
+and saw that it would mostly be the same process.
+
+I also had to look up the argv parameter in int main
+to understand where the options get stored
+
+
+3. Measuring System Calls 
+I used a c function to generate a large file with 
+random text.
+
+#include <stdlib.h>
+#include <unistd.h>
+
+int main() {
+    char c;
+    for (int i = 0; i < 5000000; i++) {
+        c = rand()% (127 - 32) + 32;
+        write(1, &c, 1);
+    }
+}
+
+a)
+To copy one file to another I used the command
+strace -c ./tr2b 'a' 'x' < output.txt > output1
+
+% time     seconds  usecs/call     calls    errors syscall
+------ ----------- ----------- --------- --------- ----------------
+ 54.54    0.000595           1       611           write
+ 29.33    0.000320           1       613           read
+  5.04    0.000055           6         9           mmap
+  3.02    0.000033           8         4           mprotect
+  1.92    0.000021           5         4           fstat
+  1.47    0.000016           8         2           open
+  1.10    0.000012          12         1           munmap
+  1.10    0.000012          12         1           execve
+  0.73    0.000008           4         2           close
+  0.73    0.000008           8         1         1 access
+  0.64    0.000007           7         1           brk
+  0.37    0.000004           4         1           arch_prctl
+------ ----------- ----------- --------- --------- ----------------
+100.00    0.001091                  1250         1 total
+
+
+strace -c ./tr2u 'a' 'x' < output.txt > output2
+% time     seconds  usecs/call     calls    errors syscall
+------ ----------- ----------- --------- --------- ----------------
+ 55.66   25.747152           5   5000000           write
+ 44.34   20.510023           4   5000002           read
+  0.00    0.000000           0         2           open
+  0.00    0.000000           0         2           close
+  0.00    0.000000           0         2           fstat
+  0.00    0.000000           0         7           mmap
+  0.00    0.000000           0         4           mprotect
+  0.00    0.000000           0         1           munmap
+  0.00    0.000000           0         1           brk
+  0.00    0.000000           0         1         1 access
+  0.00    0.000000           0         1           execve
+  0.00    0.000000           0         1           arch_prctl
+------ ----------- ----------- --------- --------- ----------------
+100.00   46.257175              10000024         1 total
+
+So here the buffered one did a much better job
+
+b)
+% time     seconds  usecs/call     calls    errors syscall
+------ ----------- ----------- --------- --------- ----------------
+ 92.80    0.016514           3      4883           write
+  6.18    0.001099           2       613           read
+  0.30    0.000054           6         9           mmap
+  0.20    0.000035           9         4           fstat
+  0.20    0.000035           9         4           mprotect
+  0.09    0.000016           8         2           open
+  0.07    0.000012          12         1           munmap
+  0.04    0.000008           4         2           close
+  0.04    0.000008           8         1         1 access
+  0.04    0.000007           7         1           execve
+  0.03    0.000005           5         1           brk
+  0.02    0.000003           3         1           arch_prctl
+------ ----------- ----------- --------- --------- ----------------
+100.00    0.017796                  5522         1 total
+
+
+strace -c ./tr2u 'a' 'x' < output.txt
+% time     seconds  usecs/call     calls    errors syscall
+------ ----------- ----------- --------- --------- ----------------
+ 56.55   26.294409           5   5000000           write
+ 43.45   20.201829           4   5000002           read
+  0.00    0.000041           6         7           mmap
+  0.00    0.000030           8         4           mprotect
+  0.00    0.000016           8         2           open
+  0.00    0.000014          14         1           execve
+  0.00    0.000012          12         1           munmap
+  0.00    0.000008           4         2           close
+  0.00    0.000008           4         2           fstat
+  0.00    0.000007           7         1         1 access
+  0.00    0.000004           4         1           brk
+  0.00    0.000003           3         1           arch_prctl
+------ ----------- ----------- --------- --------- ----------------
+100.00   46.496381              10000024         1 total
+
+buffered one still did better, but took a bunch more write calls than 
+copying
+
+4. Testing time
+time ./tr2b 'a' 'z' < output.txt > output1
+
+real 0m0.250s
+user 0m0.155s
+sys 0m0.006s
+
+time ./tr2u 'a' 'z' < output.txt > output2
+
+real 0m11.429s
+user 0m1.542s
+sys 0m9.792s
+
+
+
+----sfrob.txt----
+Testing all the files
+
+----Small File----
+sfrob
+real    0m0.006s
+user    0m0.001s
+sys     0m0.003s
+
+sfrobu
+real    0m0.006s
+user    0m0.001s
+sys     0m0.003s
+
+sfrobs
+real    0m0.015s
+user    0m0.004s
+sys     0m0.015s
+
+sfrobu -f
+real    0m0.006s
+user    0m0.001s
+sys     0m0.003s
+
+sfrobs -f
+real    0m0.014s
+user    0m0.008s
+sys     0m0.009s
+
+----Medium File----
+sfrob
+real    0m0.816s
+user    0m0.625s
+sys     0m0.029s
+
+sfrobu
+real    0m17.989s
+user    0m2.148s
+sys     0m15.671s
+
+sfrobs
+real    0m0.231s
+user    0m0.147s
+sys     0m0.067s
+
+sfrobu -f
+real    0m17.288s
+user    0m2.168s
+sys     0m14.914s
+
+sfrobs -f
+real    0m0.344s
+user    0m0.150s
+sys     0m0.069s
+
+----Large File----
+sfrob
+real    0m9.416s
+user    0m7.517s
+sys     0m0.501s
+
+sfrobu
+real    4m3.226s
+user    0m29.072s
+sys     3m32.370s
+
+sfrobs
+real    0m2.727s
+user    0m1.082s
+sys     0m0.883s
+
+sfrobu -f
+real    3m55.983s
+user    0m29.540s
+sys     3m24.809s
+
+sfrobs -f
+real    0m2.758s
+user    0m1.131s
+sys     0m0.824s
+
+
+Looking at the results from testing 10 chars,
+a 5mb file, and the rt.jar file from last lab,
+we see a huge difference between sfrob and sfrobu.
+This is expected because when reading and writing to 
+the system, it takes a lot more overhaul because it 
+stops the program and writes, while the buffered one
+puts the char in without stopping the program.  
+
+Finding a function for the time using the first two tests
+would be 
+
+f(x) = 19.82x-1892.449 where time is ms
+using points x1 = 100, x2 = 5000
+y1 = .03-.021 = .09, y2 = 10.057-.334 = 9.723
+
+Also looking at the shell file, it's much faster than
+both of the files I created for both the -f option.  This
+is because the functions that is written in bash are well
+optimized vs the functions I generated on my own.

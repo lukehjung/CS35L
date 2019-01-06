@@ -1,0 +1,151 @@
+Luke Jung, CS35L 904-982-644
+
+1. Set Locale to C:
+export LC_ALL='C'
+
+2. Sort words file:
+sort -u /usr/share/dict/words >words
+
+3. Download webpage
+wget https://web.cs.ucla.edu/classes/fall18/cs35L/assign/assign2.html
+
+4. Reading differences
+tr -c 'A-Za-z' '[\n*]' < assign2.html:
+Checks through each character for a non alphabetical character 
+and replaces it with a return character
+tr -cs 'A-Za-z' '[\n*]' < assign2.html:
+Does the same as above but only displays a single empty line 
+instead of multiple.
+tr -cs 'A-Za-z' '[\n*]' < assign2.html | sort: 
+Does same as above command but sorts the results alpa
+tr -cs 'A-Za-z' '[\n*]' < assign2.html | sort -u: 
+Sorts again but only a single instance of each word is displayed
+tr -cs 'A-Za-z' '[\n*]' < assign2.html | sort -u | comm - words: 
+Takes sorted file from above and compares it to words list, showing 
+all three columns
+tr -cs 'A-Za-z' '[\n*]' < assign2.html | sort -u | comm -23 - words: 
+Only ouputs lines that are unique to the sorted file.
+
+5. Downloading Hawaiian webpage
+wget http://mauimapp.com/moolelo/hwnwdseng.htm
+
+6. Building Script
+emacs buildwords
+#!/bin/bash
+
+# deletes at top of HTML File and to first english word
+sed '/<!DOCTYPE/,/<\/font><\/td>/d' | 
+
+# removes lines after last table line to end of html file
+sed '/<\/table>/,/<\/html>/d' |
+
+# removes all the english words by deleting first part of column
+sed '/<tr>/,/<\/td>/d' | 
+
+# removes carriage returns
+sed '/\r\n/d' |
+
+# translates all uppercase to lowercase
+tr '[:upper:]' '[:lower:]' |
+
+# removes all </td> phrases with new lines
+sed 's/<\/td>/\n/g' |
+
+# replaces ` with '
+sed s/\`/\'/g |
+
+# replace commas with new lines
+sed 's/\,/\n/g' |
+
+# delete any html stuff
+sed 's/<[^>]*>//g' |
+
+# deletes any blank spaces
+tr -d '[:blank:]' |
+
+# separates words in a sentence
+sed 's/ /\n/g' |
+
+# deletes illformed haiwaiian words
+sed '/-/d' |
+
+# deletes any misspelled hawaiin language
+tr -cs "pk\'mnwlhaeiou" '[\n*]' |
+
+# sorts the dictionary and remove duplicates
+sort -u |
+
+# remove empty lines
+sed '/^$/d'
+
+
+7. Make script executable
+chmod +x buildwords
+
+8. Build function to use with html file
+cat hwnwdseng.htm | ./buildwords > hwords
+
+9. Check Spelling
+a. Checking for mispelled English 
+cat assign2.html | tr -cs 'A-Za-z' '[\n*]' | tr '[:upper:]' '[:lower:]'
+| sort -u | comm -23 - words >misenglish
+wc -w misenglish
+OUTPUT: 38 misenglish
+Meaning there are 38 mispelled english words
+
+b. Checking for mispelled Hawaiian
+cat assign2.html | tr -cs "pk\'mnwlhaeiou" '[\n*]' | tr '[:upper:]' '[:lower:]' 
+| sort -u | comm -23 - hwords > mishawaiian
+wc -w mishawaiian
+OUPUT: 204 mishawaiian
+Meaning there are 204 mishawaiin words
+
+c. Mispelled english, but not hawaiian
+cat misenglish | tr -cs "pk\'mnwlhaeiou" '[\n*]' | sort -u | comm -12 - hwords 
+>misenglishhawaiian
+
+Results:
+halau
+po
+wiki
+
+d. Mispelled Hawaiian, but not english
+cat mishawaiian | tr -cs 'A-Za-z' '[\n*]' | sort -u | comm -12 - word
+s > mishawaiianenglish
+
+Results:
+em
+emp
+en
+ep
+epa
+h
+ha
+han
+hap
+he
+hei
+hell
+hem
+hen
+hi
+hin
+ho
+how
+howe
+i
+ia
+ie
+ile
+imp
+in
+ion
+iou
+k
+keep
+kin
+l
+lan
+le
+lea
+...

@@ -1,0 +1,176 @@
+lab9.txt
+Luke Jung
+904-982-644
+Eggert Fall 2018
+CS35L
+
+1. Get the git for the diffutils from the website. 
+git clone https://git.savannah.gnu.org/git/diffutils.git
+
+2. Log changes
+git log > git-log.txt
+
+3. Get tags
+git tag > git-tags.txt
+
+4. Get commit that for patch
+a. Find commit number
+emacs git-log.txt
+C-s 'like this'
+Copy the commit number
+62ca21c8c1a5aa3488589dcb191a4ef04ae9ed4f
+
+b. Create a patch for the commit
+git format-patch -1 62ca21c8c1a5aa3488589dcb191a4ef04ae9ed4f --stdout >
+quote-patch.txt
+
+5. Check out version 3.0
+git checkout v3.0
+
+6. Patch file
+patch -p1 < quote-patch.txt 
+
+7. Check status
+git status
+
+HEAD detached at v3.0
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git checkout -- <file>..." to discard changes in working directory)
+
+	modified:   NEWS
+	modified:   README
+	modified:   TODO
+	modified:   doc/diagmeet.note
+	modified:   ms/config.bat
+	modified:   ms/config.site
+	modified:   po/en.po
+	modified:   src/analyze.c
+	modified:   src/cmp.c
+	modified:   src/context.c
+	modified:   src/diff.c
+	modified:   src/diff.h
+	modified:   src/diff3.c
+	modified:   src/dir.c
+	modified:   src/ifdef.c
+	modified:   src/io.c
+	modified:   src/sdiff.c
+	modified:   src/side.c
+	modified:   src/system.h
+	modified:   src/util.c
+	modified:   tests/help-version
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+
+	#git-log.txt#
+	NEWS.orig
+	README-hacking.orig
+	README-hacking.rej
+	README.orig
+	README.rej
+	cfg.mk.orig
+	cfg.mk.rej
+	git-log.txt
+	git-tags.txt
+	ms/config.site.orig
+	quote-patch.txt
+	src/cmp.c.orig
+	src/context.c.orig
+	src/diff.c.orig
+	src/diff.c.rej
+	src/diff.h.orig
+	src/diff3.c.orig
+	src/diff3.c.rej
+	src/dir.c.orig
+	src/sdiff.c.orig
+	src/system.h.orig
+	src/util.c.orig
+	tests/help-version.orig
+
+no changes added to commit (use "git add" and/or "git commit -a")
+
+8/9. Use emacs functions to revert changes
+I learned you can use the emacs function 'C-x v u' to revert  changes.
+So I went through each file that wasn't a '.c' file and issued the command
+and saved each file.
+The files include
+NEWS, README, TODO, doc/diagmeet.note, ms/config.bat, ms/config.site, 
+po/en.po, src/diff.h, src/system.h, and tests/help-version
+
+Now to revert changes from .c files, we have to use a slightly different
+command on emacs vc-diff (C-x v =) and revert changes on only comments 
+using C-u-c-a
+The files include
+src/analyze.c, src/cmp.c, src/context.c, src/diff.c, src/diff3.c, 
+src/dir.c, src/ifdef.c, src/io.c, src/sdiff.c, src/side.c, and src/util.c
+
+10. Manually apply rejected patches
+I went through the rejected patches using:
+emacs src/*c.rej, seeing that the patches failed because of mismatched
+line patterns, and manually inputted them into the corresponding files.
+This incldued only diff.c and diff3.c
+I found each line by using C-s search and changing ` to '
+
+11. Delete unwanted files
+I used the find command to find all the files that have a file ending
+.orig and .rej and deleted them using the commands 
+find -type f -name '*.orig' -delete
+find -type f -name '*.rej' -delete
+
+12. Create a patch for git
+First we need to check if we modified the right amount of files
+git status
+modified:   src/cmp.c
+modified:   src/diff.c
+modified:   src/diff3.c
+modified:   src/dir.c
+modified:   src/sdiff.c
+modified:   src/util.c
+
+Then we create the patch for the git using
+git diff > quote-3.0-patch.txt
+Then I checked if the patch is enough lines using 
+wc quotewc quote-3.0-patch.txt 
+326  1776 12384 quote-3.0-patch.txt
+
+which matches the spec
+
+13. Patch the files
+First, we open the README-hacking file and go through the commands
+the first part is to run 
+./bootstrap
+
+Then since I'm using lnxsrv09, I wget the patch and change the directory
+to library and patch using 
+patch -p0 diffutils-gets.diff
+
+Then we can make
+make 
+
+Now to check we input the commands diff . - which gives the result
+diff: cannot compare '-' to a directory
+
+and diff --help
+which now gives the write quotation mark
+
+14. Checking with source code
+First we need to clone the original source code into a new directory
+git clone ~eggert/src/gnu/diffutils diffutil-3.0
+
+Then we move the source code from the original and patched to their own
+directories to compare
+cp diffutil-3.0/src/*.c diffutils-3.0
+cp diffutils/src/*.c diffutils-3.0-patch
+
+Now we can make patch files for both using the command given
+./diffutils/src/diff -pru diffutils-3.0 diffutils-3.0-patch >quote-3.0-test.txt
+
+15.
+And make a difference file with the new text file and our original
+diff -u quote-3.0-test.txt diffutils/quote-3.0-patch.txt >diff.txt
+
+Looking at the differences, it seems like a lot but it's really 
+just a lot of the of different paths and not real content
+changes.  When scrolling through and matching each part, it 
+seemed to me that every difference is innocuous.

@@ -1,0 +1,126 @@
+1. 
+a. Yes, a string can be anything because the * on the side says it can exist and not
+b. No, a string like a would appear in a|ba but not in (a|b)a
+c. Yes, a string like a would appear in both and would only have occurences of aa
+
+2. The path variable is an environment variable that explicitly says where the path
+of the functions will be going when calling a program.  For example, when setting the PATH
+to usr/local/cs/bin, we're able to access the newest gcc 
+
+3. A possible reason for the error is that we don't have the correct permissions so we need
+to use chmod +x buildwords.sh to gain execute permissions to run the command.
+
+4. 
+default: srot.o
+gcc srot.o -o srot
+
+srot.o: srot.c
+gcc -o2 srot.c -o srot.o
+
+clean:
+rm -rf *.o 
+
+5. 
+gccversion=0
+gccversion=`gcc --version | sed -n '1p' | sed  's/gcc//' | sed 's/\((GCC)\|\s\)//g'`
+if [ $gccversion != '4.7.2' ]; then
+        echo "This software requires gcc 4.7.2"
+fi
+
+6. System calls are calls to the kernel which are able to do more tasks through the CPU
+We use them judiciously because they take a lot of overhead.
+
+7. The putchar implementation uses the write feature only 1 byte at a time which is a lot of
+cost for not doing too much work.  We'll be doing the system call a whole bunch of times which
+will create a bottleneck, especially when working with larger files.
+
+8. 
+	int AXIS_X = 100, AXIS_Y = 200, AXIS_Z = 300;
+	float ***M;
+	int i,j,k;
+	// Allocating three dimensional dynamic array
+	M=(float ***) malloc(AXIS_X * sizeof(float ***));
+	
+	for(i=0;  i<AXIS_X;  i++)
+	{
+		M[i]=(float **)malloc(AXIS_Y * sizeof(float *));
+		
+		for(j=0;  j<AXIS_Y;  j++)
+		{
+			M[i][j]=(float *)malloc(AXIS_Z * sizeof(float));
+		}
+	}
+
+	free(M);
+
+9. I would first need to add her as a user on the server using
+useradd -d /home/alice -m alice
+passwd alice
+
+Then I would have to change the accessibility options for the user
+cd /home/alice
+mkdir .ssh
+chown -R alice.ssh
+chmod 700 .ssh
+
+And then I'd tell her to logon to the server using her name and the passwd
+alice, and then her public key would be saved to the .ssh file.
+
+She'd run applications on the server using ssh -X, which uses X11 port forwarding
+so she can run GUI applications on the server.
+
+10. Alice would want to encrypt the message using Bob's public key so that when it's 
+sent, Bob could decrypt it using his private key.  This works because the public key is
+something that everyone can use to first decrypt, but only Bob's private key can decode
+the message.
+
+11. cat make-log.txt | sed -n '2p' | sed 's/real [0-9].//g' | sed 's/\..*//'
+
+12. This program makes it vulnerable to stack smashing exploits, since it's reading the stdin
+and replaces the new line character with \0.  This allows for malicious code to be placed on 
+the stack array which can run functions that will change files.
+
+14. Program exceptions are events taht dirsupt the normal execution of the program.  
+To handle exceptions in python, we use try and except blocks
+>>> while True:
+...     try:
+...         x = int(input("Please enter a number: "))
+...         break
+...     except ValueError:
+...         print("Oops!  That was no valid number.  Try again...")
+
+15. 
+phone dict = {
+	'A-C':2,
+	'D-F':3,
+	'G-I':4,
+	'J-L':5,
+	'M-O':6,
+	'P-S':7,
+	'T-V':8,
+	'W-Z':9,
+}
+
+list = []
+thisfile = open("file.txt")
+for eachline in thisfile
+	var2=""
+	for ch in eachline:
+		if ch in my_dictionary:
+			var2+=my_dictionary[ch]
+		else:
+			var2+=ch
+		if var2 not in list
+			print var2
+		list.append(var2)
+
+16. Version control system helps to consolidate code
+
+17. distributed control system lets each person work and branch off of code
+also it helps to access changesets much faster bc lcocally. Can push changesets
+all at once.  
+
+18.
+a. use git log or git status to see commits
+b. you'd have to git add, git commit, and git push
+c. use git log and check to see where it happened

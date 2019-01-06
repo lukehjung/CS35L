@@ -1,0 +1,57 @@
+Luke Jung
+Assignment 6
+CS35L 
+Fall 2018
+
+Multithread Performance Lab:
+
+1. Check sort
+which sort
+/usr/local/cs/bin/sort
+
+sort --version
+sort (GNU coreutils) 8.30
+
+2. Create input file containing 2^24 doubles
+od -An -tf -N $(($4*(2**24))) </dev/urandom > random.txt
+
+Recreate file but make new space with tr command and delete
+first line
+
+od -An -tf -N $(((2**24)*8)) </dev/urandom |
+tr -s ' ' '\n' |
+sed '/^$/d' > random.txt
+
+wc -l <num.txt
+16777217
+
+3. Check Performance
+a. No options
+time -p sort -g random.txt > /dev/null
+real 66.60
+user 340.10
+sys 1.03
+
+b. 1 thread
+time -p sort -g --parallel=1 random.txt > /dev/null
+real 324.92
+user 324.23
+sys 0.67
+
+c. 2 thread
+time -p sort -g --parallel=2 random.txt > /dev/null
+real 170.02
+user 325.56
+sys 0.55
+
+d. 4 threads
+time -p sort -g --parallel=4 random.txt > /dev/null
+real 102.46
+user 350.87
+sys 0.73
+
+3. 8 threads
+time -p sort -g --parallel=8 random.txt > /dev/null
+real 63.86
+user 361.84
+sys 0.91

@@ -1,0 +1,46 @@
+#!/bin/bash
+
+# deletes at top of HTML File and to first english word
+sed '/<!DOCTYPE/,/<\/font><\/td>/d' | 
+
+# removes lines after last table line to end of html file
+sed '/<\/table>/,/<\/html>/d' |
+
+# removes all the english words by deleting first part of column
+sed '/<tr>/,/<\/td>/d' | 
+
+# removes carriage returns
+sed '/\r\n/d' |
+
+# translates all uppercase to lowercase
+tr '[:upper:]' '[:lower:]' |
+
+# removes all </td> phrases with new lines
+sed 's/<\/td>/\n/g' |
+
+# replaces ` with '
+sed s/\`/\'/g |
+
+# replace commas with new lines
+sed 's/\,/\n/g' |
+
+# delete any html stuff
+sed 's/<[^>]*>//g' |
+
+# deletes any blank spaces
+tr -d '[:blank:]' |
+
+# separates words in a sentence
+sed 's/ /\n/g' |
+
+# deletes illformed haiwaiian words
+sed '/-/d' |
+
+# deletes any misspelled hawaiin language
+tr -cs "pk\'mnwlhaeiou" '[\n*]' |
+
+# sorts the dictionary and remove duplicates
+sort -u |
+
+# remove empty lines
+sed '/^$/d'

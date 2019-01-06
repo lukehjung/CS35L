@@ -1,0 +1,104 @@
+Luke Jung
+904-982-644
+CS33 Fall 2018 Eggert
+
+Testing all the files
+
+----Small File----
+sfrob
+real    0m0.006s
+user    0m0.001s
+sys     0m0.003s
+
+sfrobu
+real    0m0.006s
+user    0m0.001s
+sys     0m0.003s
+
+sfrobs
+real    0m0.015s
+user    0m0.004s
+sys     0m0.015s
+
+sfrobu -f
+real    0m0.006s
+user    0m0.001s
+sys     0m0.003s
+
+sfrobs -f
+real    0m0.014s
+user    0m0.008s
+sys     0m0.009s
+
+----Medium File----
+sfrob
+real    0m0.816s
+user    0m0.625s
+sys     0m0.029s
+
+sfrobu
+real    0m17.989s
+user    0m2.148s
+sys     0m15.671s
+
+sfrobs
+real    0m0.231s
+user    0m0.147s
+sys     0m0.067s
+
+sfrobu -f
+real    0m17.288s
+user    0m2.168s
+sys     0m14.914s
+
+sfrobs -f
+real    0m0.344s
+user    0m0.150s
+sys     0m0.069s
+
+----Large File----
+sfrob
+real    0m9.416s
+user    0m7.517s
+sys     0m0.501s
+
+sfrobu
+real    4m3.226s
+user    0m29.072s
+sys     3m32.370s
+
+sfrobs
+real    0m2.727s
+user    0m1.082s
+sys     0m0.883s
+
+sfrobu -f
+real    3m55.983s
+user    0m29.540s
+sys     3m24.809s
+
+sfrobs -f
+real    0m2.758s
+user    0m1.131s
+sys     0m0.824s
+
+
+Looking at the results from testing 10 chars,
+a 5mb file, and the rt.jar file from last lab,
+we see a huge difference between sfrob and sfrobu.
+This is expected because when reading and writing to 
+the system, it takes a lot more overhaul because it 
+stops the program and writes, while the buffered one
+puts the char in without stopping the program.  
+
+Finding a function for the time using the first two tests
+would be 
+
+f(x) = 19.82x-1892.449 where time is ms
+using points x1 = 100, x2 = 5000
+y1 = .03-.021 = .09, y2 = 10.057-.334 = 9.723
+
+Also looking at the shell file, it's much faster than
+both of the files I created for both the -f option.  This
+is because the functions that is written in bash are well
+optimized vs the functions I generated on my own.

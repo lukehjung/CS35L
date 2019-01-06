@@ -1,0 +1,47 @@
+Lab 3
+
+1. Grab Coreutils sig  and GNU keyring
+wget ftp://ftp.gnu.org/gnu/coreutils/coreutils-8.29.tar.xz.sig
+wget https://ftp.gnu.org/gnu/gnu-keyring.gpg
+gpg --verify --keyring ./gnu-keyring.gpg coreutils-8.29.tar.xz.sig
+
+Didn't get any problems but it said that my key is not certified or
+that the signature belongs to it's owner.
+
+2. Download and install coreutils
+wget ftp://ftp.gnu.org/gnu/coreutils/coreutils-8.29.tar.xz
+tar xf coreutils-8.29.tar.xz
+mkdir coreutilsInstall
+cd coreutils-8.29
+./configure --prefix=/u/ee/ugrad/luke/cs35l/lab/lab3/coreutilsInstall
+make
+make install
+
+3. Reproduce bug
+mkdir test
+touch .
+touch ..
+touch .foo
+touch foo
+
+ls -aA shows all 4 files, not just the 2
+
+4. Patch the bug
+cd coreutils-8.29
+emacs patchfile.diff
+-paste patch into this file
+
+patch -p1 <patchfile.diff
+
+5. make
+This command remakes files that have ls in it and dir files
+because these are the files that the patch fixed.
+
+Q1. The patch slightly decreases performance because it has to check 
+for multiple options when parsing through the options for the ls command.
+
+Q2. I would probably watch out for making sure 
+the new ls command works as intended and as 
+quickly as before the patch.  Other applications 
+shouldn't be affected becausewe didn't change 
+anything to their code.

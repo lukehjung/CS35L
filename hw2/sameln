@@ -1,0 +1,72 @@
+#Luke Jung CS35L 904-982-644
+
+#!/bin/bash
+
+#set the dir variable to input of function
+dir=$1
+#sets IFS variable to new line
+IFS=$'\n'
+#declares arr variable to be array
+declare -a arr
+let count=0
+
+#creates 2 variables ot hold different files,
+#one for hidden files which should be added first
+#and one for normal files
+d=`ls $dir | sort`
+hd=`ls -a $dir | grep '^\.' | sort`
+
+#for loop to add hidden files first
+for hfile in $hd
+do
+    #if file is a link
+    if [ -L "$dir/$hfile" ] 
+    then
+	:
+    #if file is not a file or readable print error
+    elif [ ! -f "$dir/$hfile" ]    
+    then
+        :
+    elif [ ! -r "$dir/$hfile" ]
+    then
+        echo "can't read $hfile"
+    else
+	#if passes all the tests, add to array and count
+        arr[$count]="$dir/$hfile"
+        let count=count+1
+    fi
+done
+
+for file in $d
+do
+    if [ -L "$dir/$file" ]
+        then
+        :
+    elif  [ ! -f  "$dir/$file" ]
+        then
+	:
+    elif [ ! -r "$dir/$file" ]
+    then
+        echo "can't read $file"
+    else
+        arr[$count]="$dir/$file"
+        let count=count+1
+    fi
+done
+
+#for loop to test through each subject in array if same
+for (( i=0; i<$count; i++ ))
+do
+    for (( j=i+1; j<$count; j++ ))
+    do
+	#cmp function that checks first 2 variables
+        cmp -s "${arr[$i]}" "${arr[$j]}"
+        if [ $? -eq 0 ] #if cmp == 0. means they're the same
+        then
+	    #ln -fp links the first object to the other and deletes it
+            ln -fP "${arr[$i]}" "${arr[$j]}" 
+                arr[$j]=arr[$i] 
+        fi
+    done
+done
+
